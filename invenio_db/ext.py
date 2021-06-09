@@ -128,6 +128,7 @@ class InvenioDB(object):
         # Call make_versioned() before your models are defined.
         self.versioning_manager = versioning_manager or default_vm
         make_versioned(
+            session=database.session,
             user_cls=user_cls,
             manager=self.versioning_manager,
             plugins=plugins,
