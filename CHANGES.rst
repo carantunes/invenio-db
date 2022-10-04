@@ -1,12 +1,37 @@
 ..
     This file is part of Invenio.
-    Copyright (C) 2015-2020 CERN.
+    Copyright (C) 2015-2022 CERN.
 
     Invenio is free software; you can redistribute it and/or modify it
     under the terms of the MIT License; see LICENSE file for more details.
 
 Changes
 =======
+
+Version 1.0.14 (released 2022-03-30)
+
+- Adds support for SQLAlchemy 1.4 and Flask v2.1.
+
+Version 1.0.13 (released 2022-02-21)
+
+- Changes alembic migrations to run a single migration in one transaction
+  instead of all migrations in a single transaction.
+
+Version 1.0.12 (released 2022-02-14)
+
+- Fixes a deprecation warning.
+
+Version 1.0.11 (released 2022-02-08)
+
+- Fixed issue with alembic version locations introduced in v1.0.10 due to the
+  importlib change.
+
+Version 1.0.10 (released 2022-02-08)
+
+- Adds a utility for creating an alembic test context to centrally manage
+  fixes for alembic migration tests in other modules.
+
+- Replaces pkg_resources with importlib
 
 Version 1.0.9 (released 2021-03-18)
 

@@ -9,13 +9,12 @@
 
 """Pytest configuration."""
 
-from __future__ import absolute_import, print_function
-
 import os
 
 import pytest
 from flask import Flask
-from flask.cli import ScriptInfo
+
+from invenio_db.utils import alembic_test_context
 
 
 @pytest.fixture()
@@ -23,6 +22,7 @@ def db():
     """Database fixture with session sharing."""
     import invenio_db
     from invenio_db import shared
+
     db = invenio_db.db = shared.db = shared.SQLAlchemy(
         metadata=shared.MetaData(naming_convention=shared.NAMING_CONVENTION)
     )
@@ -36,13 +36,9 @@ def app():
     app.config.update(
         DB_VERSIONING=False,
         DB_VERSIONING_USER_MODEL=None,
-        SQLALCHEMY_DATABASE_URI=os.environ.get('SQLALCHEMY_DATABASE_URI',
-                                               'sqlite:///test.db')
+        SQLALCHEMY_DATABASE_URI=os.environ.get(
+            "SQLALCHEMY_DATABASE_URI", "sqlite:///test.db"
+        ),
+        ALEMBIC_CONTEXT=alembic_test_context(),
     )
     return app
-
-
-@pytest.fixture()
-def script_info(app):
-    """Get ScriptInfo object for testing CLI."""
-    return ScriptInfo(create_app=lambda info: app)

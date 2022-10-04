@@ -2,36 +2,35 @@
 #
 # This file is part of Invenio.
 # Copyright (C) 2015-2018 CERN.
+# Copyright (C) 2022 RERO.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
 """Versioning tests for Invenio-DB"""
 
+from unittest.mock import patch
+
 import pytest
-from mock import patch
-from sqlalchemy_continuum import VersioningManager, make_versioned, \
-    remove_versioning
+from sqlalchemy_continuum import VersioningManager, remove_versioning
 from test_db import _mock_entry_points
 
 from invenio_db import InvenioDB
 
 
-@patch('pkg_resources.iter_entry_points', _mock_entry_points)
+@patch("importlib_metadata.entry_points", _mock_entry_points("invenio_db.models_a"))
 def test_disabled_versioning(db, app):
     """Test SQLAlchemy-Continuum with disabled versioning."""
-    InvenioDB(app, entry_point_group='invenio_db.models_a')
+    InvenioDB(app, entry_point_group="invenio_db.models_a")
 
     with app.app_context():
         assert 2 == len(db.metadata.tables)
 
 
-@pytest.mark.parametrize("versioning,tables", [
-    (False, 1),  (True, 3)
-])
+@pytest.mark.parametrize("versioning,tables", [(False, 1), (True, 3)])
 def test_disabled_versioning_with_custom_table(db, app, versioning, tables):
     """Test SQLAlchemy-Continuum table loading."""
-    app.config['DB_VERSIONING'] = versioning
+    app.config["DB_VERSIONING"] = versioning
 
     class EarlyClass(db.Model):
 
@@ -39,8 +38,9 @@ def test_disabled_versioning_with_custom_table(db, app, versioning, tables):
 
         pk = db.Column(db.Integer, primary_key=True)
 
-    idb = InvenioDB(app, entry_point_group=None, db=db,
-                    versioning_manager=VersioningManager())
+    idb = InvenioDB(
+        app, entry_point_group=None, db=db, versioning_manager=VersioningManager()
+    )
 
     with app.app_context():
         db.drop_all()
@@ -60,13 +60,17 @@ def test_disabled_versioning_with_custom_table(db, app, versioning, tables):
         remove_versioning(manager=idb.versioning_manager)
 
 
-@patch('pkg_resources.iter_entry_points', _mock_entry_points)
+@patch("importlib_metadata.entry_points", _mock_entry_points("invenio_db.models_b"))
 def test_versioning(db, app):
     """Test SQLAlchemy-Continuum enabled versioning."""
-    app.config['DB_VERSIONING'] = True
+    app.config["DB_VERSIONING"] = True
 
-    idb = InvenioDB(app, entry_point_group='invenio_db.models_b', db=db,
-                    versioning_manager=VersioningManager())
+    idb = InvenioDB(
+        app,
+        entry_point_group="invenio_db.models_b",
+        db=db,
+        versioning_manager=VersioningManager(),
+    )
 
     with app.app_context():
         assert 4 == len(db.metadata.tables)
@@ -74,7 +78,8 @@ def test_versioning(db, app):
         db.create_all()
 
         from demo.versioned_b import UnversionedArticle, VersionedArticle
-        original_name = 'original_name'
+
+        original_name = "original_name"
 
         versioned = VersionedArticle()
         unversioned = UnversionedArticle()
@@ -88,7 +93,7 @@ def test_versioning(db, app):
 
         assert unversioned.name == versioned.name
 
-        modified_name = 'modified_name'
+        modified_name = "modified_name"
 
         versioned.name = modified_name
         unversioned.name = modified_name
@@ -117,12 +122,13 @@ def test_versioning(db, app):
 
 def test_versioning_without_versioned_tables(db, app):
     """Test SQLAlchemy-Continuum without versioned tables."""
-    app.config['DB_VERSIONING'] = True
+    app.config["DB_VERSIONING"] = True
 
-    idb = InvenioDB(app, db=db, entry_point_group=None,
-                    versioning_manager=VersioningManager())
+    idb = InvenioDB(
+        app, db=db, entry_point_group=None, versioning_manager=VersioningManager()
+    )
 
     with app.app_context():
-        assert 'transaction' in db.metadata.tables
+        assert "transaction" in db.metadata.tables
 
     remove_versioning(manager=idb.versioning_manager)
